@@ -1,33 +1,55 @@
 import 'package:flutter/material.dart';
+import '../pages/send_money_page.dart';
 
 class QuickActionsSection extends StatelessWidget {
   const QuickActionsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildQuickAction(
-            icon: Icons.store,
-            label: 'Pay Merchant',
+          _buildAction(
+            context,
+            icon: Icons.store_outlined,
+            label: 'Payer\nMarchand',
             onTap: () {},
           ),
-          _buildQuickAction(
-            icon: Icons.phone_android,
-            label: 'Top Up Credit',
+          _buildAction(
+            context,
+            icon: Icons.phone_android_outlined,
+            label: 'Crédit\nTéléphone',
             onTap: () {},
           ),
-          _buildQuickAction(
-            icon: Icons.send,
-            label: 'Transfer Money',
-            onTap: () {},
+          _buildAction(
+            context,
+            icon: Icons.send_outlined,
+            label: 'Envoyer\nArgent',
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SendMoneyPage()),
+              );
+            },
           ),
-          _buildQuickAction(
-            icon: Icons.account_balance_wallet,
-            label: 'Cash Withdrawal',
+          _buildAction(
+            context,
+            icon: Icons.account_balance_wallet_outlined,
+            label: 'Retrait\nEspèces',
             onTap: () {},
           ),
         ],
@@ -35,34 +57,35 @@ class QuickActionsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickAction({
+  Widget _buildAction(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF7900),
+            width: 56,
+            height: 56,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFF7900),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: Icon(icon, color: Colors.white, size: 26),
           ),
           const SizedBox(height: 8),
           Text(
             label,
             style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
               color: Color(0xFF333333),
+              height: 1.3,
             ),
             textAlign: TextAlign.center,
           ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../models/partner.dart';
 import '../services/database_helper.dart';
 
@@ -8,8 +7,20 @@ class PartnersSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -17,56 +28,64 @@ class PartnersSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Favorite partners',
+                'Partenaires favoris',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF333333),
+                  color: Color(0xFF212121),
                 ),
               ),
               TextButton(
                 onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
                 child: const Text(
-                  'SEE MORE →',
+                  'Voir tout →',
                   style: TextStyle(
                     color: Color(0xFFFF7900),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 13,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           SizedBox(
-            height: 120,
+            height: 110,
             child: FutureBuilder<List<Partner>>(
               future: DatabaseHelper.instance.getPartners(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                final partners = snapshot.data ?? [];
-
-                if (partners.isEmpty) {
                   return const Center(
-                    child: Text(
-                      'No partners found',
-                      style: TextStyle(color: Colors.grey),
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFFFF7900),
+                      ),
                     ),
                   );
                 }
-
+                final partners = snapshot.data ?? [];
+                if (partners.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Aucun partenaire trouvé',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  );
+                }
                 return ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: partners.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 12),
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemBuilder: (context, index) {
-                    final partner = partners[index];
-                    return _buildPartnerCard(
-                      logoUrl: partner.logo,
-                      name: partner.name,
-                    );
+                    return _PartnerCard(partner: partners[index]);
                   },
                 );
               },
@@ -76,55 +95,78 @@ class PartnersSection extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildPartnerCard({required String logoUrl, required String name}) {
-    return Container(
-      width: 90,
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.grey[300]!,
-          width: 1,
+class _PartnerCard extends StatelessWidget {
+  final Partner partner;
+  const _PartnerCard({required this.partner});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        width: 88,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFEEEEEE), width: 1),
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipOval(
-            child: Image.network(
-              logoUrl,
-              width: 48,
-              height: 48,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 48,
-                  height: 48,
-                  color: Colors.grey[200],
-                  child: const Icon(
-                    Icons.image,
-                    color: Colors.grey,
-                    size: 24,
-                  ),
-                );
-              },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                partner.logo,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback: coloured initials circle
+                  final initials = partner.name
+                      .split(' ')
+                      .map((w) => w.isNotEmpty ? w[0] : '')
+                      .take(2)
+                      .join()
+                      .toUpperCase();
+                  return Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFF7900),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      initials,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            name,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF333333),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                partner.name,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF333333),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
